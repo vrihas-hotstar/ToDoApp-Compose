@@ -24,6 +24,7 @@ class TodoViewModel @Inject constructor(
        viewModelScope.launch {
            todoDataRepositoryImpl.addTodo(todo)
        }
+
     }
 
     fun updateTodo(todo: Todo) {

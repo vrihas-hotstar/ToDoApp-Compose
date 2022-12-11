@@ -30,11 +30,13 @@ import com.vrihas.todoapp.data.Todo
 @Composable
 fun FullScreenDialog(
     openDialog: MutableState<Boolean>,
-    onClickAdd: (todo: Todo) -> Unit = {}
+    isNewTodo: Boolean,
+    todo: Todo,
+    onClickAdd: (todo: Todo) -> Unit = {},
+    onClickEdit: (todo: Todo) -> Unit = {}
 ) {
-
-    var todoTitle by remember { mutableStateOf(TextFieldValue("")) }
-    var todoNote by remember { mutableStateOf(TextFieldValue("")) }
+    var todoTitle by remember { mutableStateOf(TextFieldValue(todo.title)) }
+    var todoNote by remember { mutableStateOf(TextFieldValue(todo.note)) }
 
     AlertDialog(
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false),
@@ -44,8 +46,9 @@ fun FullScreenDialog(
             openDialog.value = false
         },
         title = {
+            val heading = if(isNewTodo) "Add Todo" else "Update Todo"
             Text(
-                text = "Add Todo", modifier = Modifier.padding(20.dp),
+                text = heading, modifier = Modifier.padding(20.dp),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -86,23 +89,40 @@ fun FullScreenDialog(
                     )
                 )
             }
-
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    if (todoTitle.text.isNotEmpty() && todoNote.text.isNotEmpty()) {
-                        onClickAdd(
-                            Todo(id = 0, title = todoTitle.text, note = todoNote.text)
-                        )
-                        openDialog.value = false // for closing the dialog
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
-            ) {
-                Text(
-                    "Add", color = Color.White,
-                )
+            if (isNewTodo) {
+                Button(
+                    onClick = {
+                        if (todoTitle.text.isNotEmpty() && todoNote.text.isNotEmpty()) {
+                            onClickAdd(
+                                Todo(todo.id, title = todoTitle.text, note = todoNote.text)
+                            )
+                            openDialog.value = false // for closing the dialog
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
+                ) {
+                    Text(
+                        "Add", color = Color.White,
+                    )
+                }
+            } else {
+                Button(
+                    onClick = {
+                        if (todoTitle.text.isNotEmpty() && todoNote.text.isNotEmpty()) {
+                            onClickEdit(
+                                Todo(todo.id, title = todoTitle.text, note = todoNote.text)
+                            )
+                            openDialog.value = false // for closing the dialog
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
+                ) {
+                    Text(
+                        "Update", color = Color.White,
+                    )
+                }
             }
         },
         dismissButton = {

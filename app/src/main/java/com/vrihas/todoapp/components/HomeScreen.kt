@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vrihas.todoapp.data.Todo
 import com.vrihas.todoapp.viewmodels.TodoViewModel
 
 
@@ -26,12 +27,16 @@ fun HomeScreen(
     viewModel: TodoViewModel
 ) {
     val openDialog = remember { mutableStateOf(false) }
+    val isNewTodo = remember { mutableStateOf(false) }
+    val todoState = remember { mutableStateOf(Todo(id = 0, title = "", note = "")) }
     val todoList = viewModel.getAllTodos().observeAsState()
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    todoState.value = Todo(id = 0, title = "", note = "")
+                    isNewTodo.value = true
                     openDialog.value = true
                 }
             ) {
@@ -42,8 +47,14 @@ fun HomeScreen(
                 if (openDialog.value) {
                     FullScreenDialog(
                         openDialog = openDialog,
+                        isNewTodo = isNewTodo.value,
+                        todo = todoState.value,
                         onClickAdd = { newTodo ->
                             viewModel.addTodo(newTodo)
+                        },
+                        onClickEdit = { newTodo ->
+                            viewModel.updateTodo(newTodo)
+
                         }
                     )
                 }
@@ -57,7 +68,9 @@ fun HomeScreen(
     ) {
         if (todoList.value?.size == 0) {
             Text(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp),
                 text = "Add your Todos",
             )
         } else {
@@ -74,6 +87,9 @@ fun HomeScreen(
                                 todo = todo,
                                 onCLickTodo = {
                                     // todo: open a alert box to edit
+                                    todoState.value = todo
+                                    isNewTodo.value = false
+                                    openDialog.value = true
                                 },
                                 onDeleteTodo = {
                                     viewModel.deleteTodo(todo)
